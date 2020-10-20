@@ -1,0 +1,17 @@
+package main
+
+/**
+  Данный файл содержит изменяемую часть сервера Api
+  Список методов и функции-обработчики
+*/
+
+import (
+	"github.com/mikelpsv/auth_service/routes"
+)
+
+func RegisterHandlers(routeItems app.Routes) app.Routes {
+	routeItems = routes.RegisterUserHandler(routeItems)
+	//routeItems = routes.RegisterCustomerHandler(routeItems)
+
+	return routeItems
+}
