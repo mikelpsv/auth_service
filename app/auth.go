@@ -8,14 +8,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
 type TokenPair struct {
-	AccessToken  string `json:"access_token"`
+	AccessToken string `json:"access_token"`
+	TokenType string `json:"token_type"`
+	ExpiresIn int64 `json:"expires_in"`
 	RefreshToken string `json:"refresh_token"`
 }
 
@@ -39,28 +40,28 @@ func ValidPassword(hashedPassword, password string) (bool, error) {
 /*
 	Создаем и подписываем пару токенов
 */
-func CreateTokenPair(user_id int64) (*TokenPair, error) {
+func CreateTokenPair(userId int64, secret string, tokenExpiresSec int64) (*TokenPair, error) {
 	accessClaims := jwt.MapClaims{}
 	accessClaims["authorized"] = true
-	accessClaims["sub"] = user_id
-	accessClaims["exp"] = time.Now().Add(time.Minute * 15).Unix() //Token expires after 15 minutes
+	accessClaims["sub"] = userId
+	accessClaims["exp"] = time.Now().Add(time.Duration(tokenExpiresSec) * time.Second).Unix() //Token expires after 15 minutes
 
 	refreshClaims := jwt.MapClaims{}
-	refreshClaims["sub"] = user_id
-	refreshClaims["exp"] = time.Now().Add(time.Hour * 12).Unix() //Token expires after 12 hour
+	refreshClaims["sub"] = userId
+	refreshClaims["exp"] = time.Now().Add(time.Hour * 24).Unix() //Token expires after 12 hour
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
 
-	accessTokenString, err := accessToken.SignedString([]byte(os.Getenv("JWT_ACCESS_SECRET")))
+	accessTokenString, err := accessToken.SignedString([]byte(secret))
 	if err != nil {
 		log.Printf("Create signed access tocken string %v", err)
 	}
-	refreshTokenSting, err := refreshToken.SignedString([]byte(os.Getenv("JWT_REFRESH_SECRET")))
+	refreshTokenSting, err := refreshToken.SignedString([]byte(secret))
 	if err != nil {
 		log.Printf("Create signed refresh tocken string %v", err)
 	}
-	return &TokenPair{accessTokenString, refreshTokenSting}, err
+	return &TokenPair{accessTokenString, "bearer", tokenExpiresSec, refreshTokenSting}, err
 }
 
 /*

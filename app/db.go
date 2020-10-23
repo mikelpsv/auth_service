@@ -3,33 +3,17 @@ package app
 import (
 	"context"
 	"database/sql"
-	"fmt"
-
-	_ "github.com/denisenkom/go-mssqldb"
+	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"time"
 )
 
 var Db *sql.DB
 
 func InitDb(host, dbname, dbuser, dbpass string) {
 	var err error
-/*
-	connStr := fmt.Sprintf("host=%s dbname=%s user=%s password=%s sslmode=disable", host, dbname, dbuser, dbpass)
-	Db, err = sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	err = Db.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-*/
-
-	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;database=%s;", host, dbuser, dbpass, dbname)
-
-	Db, err = sql.Open("sqlserver", connString)
+	Db, err = sql.Open("sqlite3", ".data/authdata.db")
 	if err != nil {
 		log.Fatal("Error creating connection pool: ", err.Error())
 	}
@@ -43,4 +27,40 @@ func InitDb(host, dbname, dbuser, dbpass string) {
 
 func Close() {
 	Db.Close()
+}
+
+func Install() {
+	sql := `
+		CREATE TABLE IF NOT EXISTS clients (
+			_id INTEGER PRIMARY KEY AUTOINCREMENT, 
+			name TEXT,
+			secret TEXT,
+			expires INTEGER,
+			created_at DATETIME,
+			updated_at DATETIME
+		)`
+	_, err := Db.Exec(sql)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	sql = `INSERT INTO clients (name, secret, expires, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)`
+	_, err = Db.Exec(sql, "Основная система", "hjhgHJGjhh767Kjh7", 3600, time.Now(), time.Now().Add(3600))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	sql = `CREATE TABLE IF NOT EXISTS users	(
+    			_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    			username  TEXT    default '',
+    			password  TEXT    default '',
+    			client_id INTEGER default 0
+	);
+`
+	_, err = Db.Exec(sql)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+
+
 }

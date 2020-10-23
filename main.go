@@ -30,6 +30,7 @@ func main() {
 	routeItems = RegisterHandlers(routeItems)
 	router := NewRouter(routeItems)
 	app.InitDb(Config.DB_HOST, Config.DB_NAME, Config.DB_USER, Config.DB_PASS)
+	app.Install()
 	log.Fatal(http.ListenAndServe(Config.APP_ADDR+":"+Config.APP_PORT, router))
 }
 
