@@ -10,11 +10,10 @@ type User struct {
 	Name     string `json:"name"`
 	Username int64  `json:"username"`
 	Password string `json:"password"`
-	ClientId int64 `json:"client_id"`
+	ClientId int64  `json:"client_id"`
 }
 
-
-func (u *User) FindById(userId int64) *User  {
+func (u *User) FindById(userId int64) *User {
 	rows, err := app.Db.Query("SELECT _id, username, password, client_id FROM users WHERE _id = $1", userId)
 	if err != nil {
 		return &User{}
@@ -31,7 +30,7 @@ func (u *User) FindById(userId int64) *User  {
 	return u
 }
 
-func (u *User) ValidPassword(passwordString string) (bool, error)  {
+func (u *User) ValidPassword(passwordString string) (bool, error) {
 	return app.ValidPassword(u.Password, passwordString)
 }
 

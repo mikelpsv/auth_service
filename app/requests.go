@@ -9,7 +9,7 @@ func GetSimpleValue(r *http.Request, paramName string) (value string, exists boo
 	val, exists := r.URL.Query()[paramName]
 	if exists {
 		return val[0], exists
-	}else {
+	} else {
 		return "", exists
 	}
 
@@ -19,7 +19,7 @@ func GetSimpleValueAsInt(r *http.Request, paramName string) (value int64, exists
 	val_map, exists := r.URL.Query()[paramName]
 	if exists {
 		value, err = strconv.ParseInt(val_map[0], 10, 64)
-	}else {
+	} else {
 		value = 0
 	}
 	return value, exists, err

@@ -22,8 +22,6 @@ type AppCfg struct {
 
 var Config AppCfg
 
-//var routeItems app.Routes
-
 func main() {
 	ReadEnv()
 	routeItems := app.Routes{}

@@ -54,22 +54,20 @@ func requestToken(w http.ResponseWriter, r *http.Request) {
 
 	clientSecret, isVarFound = app.GetSimpleValue(r, "client_secret")
 
-	if !isVarFound{
+	if !isVarFound {
 		log.Println("Parameter client_secret is required")
 		app.ResponseERROR(w, http.StatusBadRequest, errors.New("invalid_request"))
 		return
 	}
 
-
 	client := models.Client{}
 	client.FindById(clientId)
 	res, err := client.ValidSecret(clientSecret)
-	if !res || err != nil{
+	if !res || err != nil {
 		log.Printf("Client valid secret %s, error %s", res, err)
 		app.ResponseERROR(w, http.StatusBadRequest, errors.New("unauthorized_client"))
 		return
 	}
-
 
 	if grantType == "password" {
 		// Resource Owner Password Credentials
@@ -93,12 +91,12 @@ func requestToken(w http.ResponseWriter, r *http.Request) {
 		user := new(models.User)
 		user.FindByUserName(url.QueryEscape(username))
 
-		if user.Id == 0{
+		if user.Id == 0 {
 			app.ResponseERROR(w, http.StatusBadRequest, errors.New("invalid_grant"))
 			return
 		}
 
-		if valid, _ := user.ValidPassword(password); !valid{
+		if valid, _ := user.ValidPassword(password); !valid {
 			app.ResponseERROR(w, http.StatusBadRequest, errors.New("invalid_grant"))
 			return
 		}
@@ -116,10 +114,9 @@ func requestToken(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-
 		app.ReadToken(client.Id, client.Secret, refreshToken)
 		//tokenPair, _ := app.CreateTokenPair(10, client.Secret, client.TokenExpires)
-	}else{
+	} else {
 		app.ResponseERROR(w, http.StatusBadRequest, errors.New("unsupported_grant_type"))
 		log.Println("unsupported_grant_type")
 	}
