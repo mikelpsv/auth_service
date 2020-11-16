@@ -14,13 +14,13 @@ import (
 )
 
 type TokenPair struct {
-	AccessToken string `json:"access_token"`
-	TokenType string `json:"token_type"`
-	ExpiresIn int64 `json:"expires_in"`
+	AccessToken  string `json:"access_token"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int64  `json:"expires_in"`
 	RefreshToken string `json:"refresh_token"`
 }
 
-var TempSecret = "1234567890"
+var TempSecret = "123"
 
 // https://levelup.gitconnected.com/crud-restful-api-with-go-gorm-jwt-postgres-mysql-and-testing-460a85ab7121
 
@@ -40,7 +40,7 @@ func ValidPassword(hashedPassword, password string) (bool, error) {
 /*
 	Создаем и подписываем пару токенов
 */
-func CreateTokenPair(userId int64, secret string, tokenExpiresSec int64) (*TokenPair, error) {
+func CreateTokenPair(userId int64, secretKey string, tokenExpiresSec int64) (*TokenPair, error) {
 	accessClaims := jwt.MapClaims{}
 	accessClaims["authorized"] = true
 	accessClaims["sub"] = userId
@@ -53,15 +53,31 @@ func CreateTokenPair(userId int64, secret string, tokenExpiresSec int64) (*Token
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
 
-	accessTokenString, err := accessToken.SignedString([]byte(secret))
+	accessTokenString, err := accessToken.SignedString([]byte(secretKey))
 	if err != nil {
 		log.Printf("Create signed access tocken string %v", err)
 	}
-	refreshTokenSting, err := refreshToken.SignedString([]byte(secret))
+	refreshTokenSting, err := refreshToken.SignedString([]byte(secretKey))
 	if err != nil {
 		log.Printf("Create signed refresh tocken string %v", err)
 	}
 	return &TokenPair{accessTokenString, "bearer", tokenExpiresSec, refreshTokenSting}, err
+}
+
+func ReadToken(clientId int64, clientSecret string, tokenString string) error {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(clientSecret), nil
+	})
+	if err != nil {
+		return err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		Pretty(claims)
+	}
+	return nil
 }
 
 /*
