@@ -60,7 +60,7 @@ func requestToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := models.Client{}
+	client := new(models.Client)
 	client.FindById(clientId)
 	res, err := client.ValidSecret(clientSecret)
 	if !res || err != nil {
@@ -101,7 +101,7 @@ func requestToken(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		tokenPair, _ := getToken(grantType, new(models.User), &client)
+		tokenPair, _ := getToken(grantType, user, client)
 		app.ResponseJSON(w, http.StatusOK, tokenPair)
 
 	} else if grantType == "refresh_token" {
