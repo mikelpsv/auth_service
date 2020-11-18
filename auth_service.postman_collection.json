@@ -1,0 +1,131 @@
+{
+	"info": {
+		"_postman_id": "da048216-910d-49a0-b123-aa1d41564085",
+		"name": "auth_service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "grant_type_password",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{HOST}}:{{PORT}}/token?grant_type=password&client_id=1&client_secret=secret_string&username=mylogin&password=mypassword",
+					"host": [
+						"{{HOST}}"
+					],
+					"port": "{{PORT}}",
+					"path": [
+						"token"
+					],
+					"query": [
+						{
+							"key": "grant_type",
+							"value": "password",
+							"description": "Тип запроса"
+						},
+						{
+							"key": "client_id",
+							"value": "1",
+							"description": "Идентификатор системы"
+						},
+						{
+							"key": "client_secret",
+							"value": "secret_string",
+							"description": "Пароль системы"
+						},
+						{
+							"key": "username",
+							"value": "mylogin",
+							"description": "Логин пользователя"
+						},
+						{
+							"key": "password",
+							"value": "mypassword",
+							"description": "Пароль пользователя"
+						}
+					]
+				},
+				"description": "Авторизация по логину и паролю.\nВозвращает пару токенов."
+			},
+			"response": []
+		},
+		{
+			"name": "grant_type_refresh_token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{HOST}}:{{PORT}}/token?grant_type=refresh_token&client_id=1&client_secret=secret_string&refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MDU2MTA3NzEsInN1YiI6MTB9.WQEh_RlMKnhZmvcKPeYfceFsTA5LYUTAwF2H15eAv7s",
+					"host": [
+						"{{HOST}}"
+					],
+					"port": "{{PORT}}",
+					"path": [
+						"token"
+					],
+					"query": [
+						{
+							"key": "grant_type",
+							"value": "refresh_token",
+							"description": "Тип запроса"
+						},
+						{
+							"key": "client_id",
+							"value": "1",
+							"description": "Идентификатор системы"
+						},
+						{
+							"key": "client_secret",
+							"value": "secret_string",
+							"description": "Пароль системы"
+						},
+						{
+							"key": "refresh_token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MDU2MTA3NzEsInN1YiI6MTB9.WQEh_RlMKnhZmvcKPeYfceFsTA5LYUTAwF2H15eAv7s",
+							"description": "Refresh токен"
+						}
+					]
+				},
+				"description": "Авторизация по логину и паролю.\nВозвращает пару токенов."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "6164bbd3-1bc3-4656-8bb6-98477fad00c5",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "cb2210ba-47fa-4a51-865c-b5ce1286757d",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "7897d514-4e4d-4596-971b-2fe0d4d65b0f",
+			"key": "HOST",
+			"value": "127.0.0.1"
+		},
+		{
+			"id": "5c70a1d5-edf1-4a30-a7c9-6c741fee1fb6",
+			"key": "PORT",
+			"value": "8989"
+		}
+	],
+	"protocolProfileBehavior": {}
+}

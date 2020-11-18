@@ -13,14 +13,6 @@ import (
 
 func RegisterServiceHandler(routeItems app.Routes) app.Routes {
 	routeItems = append(routeItems, app.Route{
-		Name:          "Authorize",
-		Method:        "POST",
-		Pattern:       "/authorize",
-		SetHeaderJSON: true,
-		ValidateToken: false,
-		HandlerFunc:   nil,
-	})
-	routeItems = append(routeItems, app.Route{
 		Name:          "Token",
 		Method:        "POST",
 		Pattern:       "/token",
