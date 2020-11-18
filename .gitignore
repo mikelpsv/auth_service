@@ -3,3 +3,4 @@ vendor
 .data
 .env
 !.env.sample
+auth_service
