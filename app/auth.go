@@ -1,14 +1,12 @@
 package app
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	jwt "github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -64,20 +62,20 @@ func CreateTokenPair(userId int64, secretKey string, tokenExpiresSec int64) (*To
 	return &TokenPair{accessTokenString, "bearer", tokenExpiresSec, refreshTokenSting}, err
 }
 
-func ReadToken(clientId int64, clientSecret string, tokenString string) error {
+func ReadToken(secretKey string, tokenString string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(clientSecret), nil
+		return []byte(secretKey), nil
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		Pretty(claims)
+	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return token, nil
 	}
-	return nil
+	return nil, err
 }
 
 /*
@@ -86,7 +84,7 @@ func ReadToken(clientId int64, clientSecret string, tokenString string) error {
 func TokenValid(r *http.Request) error {
 	tokenString := ExtractToken(r)
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
@@ -95,9 +93,9 @@ func TokenValid(r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		Pretty(claims)
-	}
+	//if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	//Pretty(claims)
+	//}
 	return nil
 }
 
@@ -112,38 +110,4 @@ func ExtractToken(r *http.Request) string {
 		return strings.Split(bearerToken, " ")[1]
 	}
 	return ""
-}
-
-func ExtractTokenID(r *http.Request) (int64, error) {
-
-	tokenString := ExtractToken(r)
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(TempSecret), nil
-	})
-	if err != nil {
-		return 0, err
-	}
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if ok && token.Valid {
-		uid, err := strconv.ParseInt(fmt.Sprintf("%.0f", claims["sub"]), 10, 64)
-		if err != nil {
-			return 0, err
-		}
-		return int64(uid), nil
-	}
-	return 0, nil
-}
-
-//Pretty display the claims licely in the terminal
-func Pretty(data interface{}) {
-	b, err := json.MarshalIndent(data, "", " ")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	fmt.Println(string(b))
 }

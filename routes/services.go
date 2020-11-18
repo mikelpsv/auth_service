@@ -2,11 +2,13 @@ package routes
 
 import (
 	"errors"
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/mikelpsv/auth_service/app"
 	"github.com/mikelpsv/auth_service/models"
 	"log"
 	"net/http"
-	"net/url"
+	"strconv"
 )
 
 func RegisterServiceHandler(routeItems app.Routes) app.Routes {
@@ -76,32 +78,31 @@ func requestToken(w http.ResponseWriter, r *http.Request) {
 		var username = ""
 		var password = ""
 
-		if _, isVarFound = app.GetSimpleValue(r, "username"); !isVarFound {
+		if username, isVarFound = app.GetSimpleValue(r, "username"); !isVarFound {
 			app.ResponseERROR(w, http.StatusBadRequest, errors.New("invalid_request"))
 			log.Println("Parameter username is required")
 			return
 		}
 
-		if _, isVarFound = app.GetSimpleValue(r, "password"); !isVarFound {
+		if password, isVarFound = app.GetSimpleValue(r, "password"); !isVarFound {
 			app.ResponseERROR(w, http.StatusBadRequest, errors.New("invalid_request"))
 			log.Println("Parameter password is required")
 			return
 		}
 
 		user := new(models.User)
-		user.FindByUserName(url.QueryEscape(username))
+		user.FindByUserName(username)
 
 		if user.Id == 0 {
 			app.ResponseERROR(w, http.StatusBadRequest, errors.New("invalid_grant"))
 			return
 		}
-
 		if valid, _ := user.ValidPassword(password); !valid {
 			app.ResponseERROR(w, http.StatusBadRequest, errors.New("invalid_grant"))
 			return
 		}
 
-		tokenPair, _ := getToken(grantType, user, client)
+		tokenPair, _ := app.CreateTokenPair(user.Id, client.SecretKey, client.TokenExpires)
 		app.ResponseJSON(w, http.StatusOK, tokenPair)
 
 	} else if grantType == "refresh_token" {
@@ -114,15 +115,26 @@ func requestToken(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		app.ReadToken(client.Id, client.Secret, refreshToken)
-		//tokenPair, _ := app.CreateTokenPair(10, client.Secret, client.TokenExpires)
+		token, _ := app.ReadToken(client.SecretKey, refreshToken)
+
+		if token.Valid {
+
+			claims, ok := token.Claims.(jwt.MapClaims)
+			if !ok {
+				// return
+			}
+
+			userId, err := strconv.ParseInt(fmt.Sprintf("%.0f", claims["sub"]), 10, 64)
+			if err != nil {
+				return // ошибка чтения/конвертирования sub
+			}
+
+			tokenPair, _ := app.CreateTokenPair(userId, client.SecretKey, client.TokenExpires)
+			app.ResponseJSON(w, http.StatusOK, tokenPair)
+		}
+
 	} else {
 		app.ResponseERROR(w, http.StatusBadRequest, errors.New("unsupported_grant_type"))
 		log.Println("unsupported_grant_type")
 	}
-}
-
-func getToken(grantType string, user *models.User, client *models.Client) (*app.TokenPair, error) {
-	tokenPair, _ := app.CreateTokenPair(user.Id, client.SecretKey, client.TokenExpires)
-	return tokenPair, nil
 }
