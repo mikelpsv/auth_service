@@ -14,8 +14,8 @@ func TestGetSimpleValue(t *testing.T) {
 	if !exist {
 		t.Error(!exist, "param `test_param` not found")
 	}
-	if val != "93"{
-		t.Error(val =="93")
+	if val != "93" {
+		t.Error(val == "93")
 	}
 
 }
@@ -29,7 +29,7 @@ func TestGetSimpleValueAsInt(t *testing.T) {
 	if !exist {
 		t.Error(!exist, "param `test_param` not found")
 	}
-	if val != 93{
+	if val != 93 {
 		t.Error(val == 93, "value is incorrect")
 	}
 	if err != nil {
@@ -47,9 +47,8 @@ func TestGetSimpleValueAsInt(t *testing.T) {
 	if !exist {
 		t.Error(!exist, "param `test_param` not found")
 	}
-	if err == nil{
+	if err == nil {
 		t.Error(err == nil)
 	}
-
 
 }

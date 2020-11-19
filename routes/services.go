@@ -58,7 +58,7 @@ func requestToken(w http.ResponseWriter, r *http.Request) {
 	client.FindById(clientId)
 	res, err := client.ValidSecret(clientSecret)
 	if !res || err != nil {
-		log.Printf("Client valid secret %b, error %s", res, err)
+		log.Printf("Client valid secret %t, error %s", res, err)
 		app.ResponseERROR(w, http.StatusBadRequest, errors.New("unauthorized_client"))
 		return
 	}
