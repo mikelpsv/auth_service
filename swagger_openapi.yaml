@@ -1,0 +1,51 @@
+openapi: 3.0.1
+info:
+  description: ""
+  version: "1.0.0"
+  title: "auth_service"
+  contact:
+    email: "mikelpsv@gmail.com"
+  license:
+    name: "AGPL"
+    url: "https://www.gnu.org/licenses/agpl-3.0.txt"
+
+tags:
+- name: "jwt"
+  description: ""
+
+paths:
+  /token:
+    post:
+      summary: "Получение/обновление токенов"
+      tags:
+        - "jwt"
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: "object"
+              properties:
+                grant_type:
+                  type: "string"
+                  description: "Требуемая операция password - получение токенов по логину паролю/refresh_token - обновление токенов по refresh токену"
+                client_id:
+                  type: "string"
+                  description: "Идентификатор клиента (системы)"
+                client_secret:
+                  type: "string"
+                  description: "Ключ доступа клиента (системы)/пароль" 
+                username:
+                  type: "string"
+                  description: "(Только для grant_type=password) Имя пользователя, для которого запрашивается доступ"
+                password:
+                  type: "string"
+                  description: "(Только для grant_type=password) Пароль пользователя, для которого запрашивается доступ"
+                refresh_token:
+                  type: "string"
+                  description: "(Только для grant_type=refresh_token) Refresh токен для обновления пары токенов"
+      responses:
+        '200':
+          description: ""
+          
+
+
